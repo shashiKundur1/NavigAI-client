@@ -1,103 +1,275 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { Navigation } from "@/app/components/navigation";
+import { HeroSection } from "@/app/components/hero-section";
+import { FeaturesSection } from "@/app/components/features-section";
+import { AuthModal } from "@/app/components/auth-modal";
+import { RocketAnimation } from "@/app/components/rocket-animation";
+import { Toaster } from "@/app/components/ui/sonner";
+
+export default function App() {
+  const [authModal, setAuthModal] = useState<{
+    isOpen: boolean;
+    mode: "login" | "signup";
+  }>({
+    isOpen: false,
+    mode: "login",
+  });
+
+  const [isIntegrating, setIsIntegrating] = useState(false);
+
+  // Optimized parallax effect for low-end devices
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    };
+
+    const updateParallax = () => {
+      const scrolled = window.pageYOffset;
+      // const rate = scrolled * -0.5;
+
+      // Only apply parallax to elements that support it efficiently
+      const parallaxElements = document.querySelectorAll("[data-parallax]");
+      parallaxElements.forEach((el) => {
+        const element = el as HTMLElement;
+        const speed = parseFloat(element.dataset.parallax || "0.5");
+        const yPos = -(scrolled * speed);
+        element.style.transform = `translate3d(0, ${yPos}px, 0)`;
+      });
+
+      ticking = false;
+    };
+
+    // Throttled scroll listener for performance
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const handleAuthClick = (mode: "login" | "signup") => {
+    setIsIntegrating(true);
+    setAuthModal({
+      isOpen: true,
+      mode,
+    });
+
+    // Stop rocket animation after modal is fully open
+    setTimeout(() => {
+      setIsIntegrating(false);
+    }, 3000);
+  };
+
+  const handleCloseAuth = () => {
+    setIsIntegrating(false);
+    setAuthModal((prev) => ({
+      ...prev,
+      isOpen: false,
+    }));
+
+    // Small delay to reset the mode after closing animation
+    setTimeout(() => {
+      setAuthModal((prev) => ({
+        ...prev,
+        mode: "login", // Reset to default mode when closed
+      }));
+    }, 300);
+  };
+
+  const handleIntegrationStart = () => {
+    setIsIntegrating(true);
+    // Stop rocket animation after integration process
+    setTimeout(() => {
+      setIsIntegrating(false);
+    }, 3000);
+  };
+
+  const handleGetStarted = () => {
+    setIsIntegrating(true);
+    setAuthModal({
+      isOpen: true,
+      mode: "signup",
+    });
+
+    // Stop rocket animation after modal is fully open
+    setTimeout(() => {
+      setIsIntegrating(false);
+    }, 3000);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+      {/* Optimized Parallax Background Elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* Primary gradient orb */}
+        <div
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-primary/5 to-accent/5 rounded-full blur-3xl"
+          data-parallax="0.2"
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+        {/* Secondary gradient orb */}
+        <div
+          className="absolute top-2/3 right-1/4 w-80 h-80 bg-gradient-to-br from-accent/5 to-primary/5 rounded-full blur-3xl"
+          data-parallax="0.3"
+        />
+        {/* Tertiary gradient orb */}
+        <div
+          className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-gradient-to-br from-primary/3 to-accent/3 rounded-full blur-2xl"
+          data-parallax="0.4"
+        />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+        {/* Animated grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.02] bg-grid-pattern animate-pulse"
+          data-parallax="0.1"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0),
+              radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)
+            `,
+            backgroundSize: "50px 50px",
+            backgroundPosition: "0 0, 25px 25px",
+            animationDuration: "20s",
+          }}
+        />
+      </div>
+
+      {/* Navigation */}
+      <Navigation onAuthClick={handleAuthClick} />
+
+      {/* Main Content */}
+      <main className="relative z-10">
+        {/* Hero Section */}
+        <HeroSection onGetStarted={handleGetStarted} />
+
+        {/* Features Section */}
+        <FeaturesSection onGetStarted={handleGetStarted} />
+
+        {/* Placeholder for additional sections */}
+        <section id="how-it-works" className="py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold mb-8">How It Works</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Our platform guides you through every step of your career
+                journey, from skill assessment to job placement.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="community" className="py-24 bg-muted/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold mb-8">Join Our Community</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Connect with like-minded students, share experiences, and grow
+                together in our supportive community.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="support" className="py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold mb-8">24/7 Support</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Get help when you need it with our comprehensive support system,
+                including AI assistance and human experts.
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* Footer */}
+      <footer className="py-12 border-t border-border/50 glass-card">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold">N</span>
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Navig AI
+              </span>
+            </div>
+
+            <div className="flex space-x-6 text-sm text-muted-foreground">
+              <a href="#" className="hover:text-foreground transition-colors">
+                Privacy
+              </a>
+              <a href="#" className="hover:text-foreground transition-colors">
+                Terms
+              </a>
+              <a href="#" className="hover:text-foreground transition-colors">
+                Contact
+              </a>
+              <a href="#" className="hover:text-foreground transition-colors">
+                Help
+              </a>
+            </div>
+          </div>
+        </div>
       </footer>
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={authModal.isOpen}
+        initialMode={authModal.mode}
+        onClose={handleCloseAuth}
+        onIntegrationStart={handleIntegrationStart}
+      />
+
+      {/* Rocket Animation */}
+      <RocketAnimation
+        isActive={isIntegrating}
+        targetElementId="navig-logo-n"
+      />
+
+      {/* Toast Notifications */}
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: "oklch(var(--card))",
+            color: "oklch(var(--card-foreground))",
+            border: "1px solid oklch(var(--border))",
+          },
+        }}
+      />
+
+      {/* Add glow effect to target when rocket is active */}
+      {isIntegrating && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+            #navig-logo-n {
+              animation: target-glow 2s ease-in-out infinite;
+              box-shadow: 0 0 20px oklch(var(--primary) / 0.5);
+            }
+            
+            @keyframes target-glow {
+              0%, 100% { 
+                box-shadow: 0 0 20px oklch(var(--primary) / 0.3);
+                transform: scale(1);
+              }
+              50% { 
+                box-shadow: 0 0 30px oklch(var(--primary) / 0.6);
+                transform: scale(1.05);
+              }
+            }
+          `,
+          }}
+        />
+      )}
     </div>
   );
 }
